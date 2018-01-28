@@ -142,11 +142,6 @@ while not motor_serial.shutdown_now :
         
                 
 
-        # Now we'll check if there is open space here
-        
-
-    
-
 
 
     ###############################################################
