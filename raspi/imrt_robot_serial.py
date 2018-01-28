@@ -26,8 +26,10 @@ class IMRTRobotSerial :
         self.mutex_ = threading.Lock()
 
         # Sonic members
-        self.dist_1_ = 0
-        self.dist_2_ = 0
+        self.dist_1_ = 255
+        self.dist_2_ = 255
+        self.dist_3_ = 255
+        self.dist_4_ = 255
         
         # Create an event for signaling threads when its time terminate the program
         self.run_event_ = threading.Event()
@@ -84,7 +86,7 @@ class IMRTRobotSerial :
         # Our message will contain the following 10 bytes:
         # [header, cmd1_high, cmd1_low, cmd2_high, cmd2_low, not_used, not_used, checksum_high, checksum_low, newline]
         # Values that cannot fit into one byte are split into two bytes (xx_high, xx_low) using bitwise logic
-        
+
         tx_msg = [0] * self.MSG_SIZE
 
         tx_msg[0]  = ord('c')               # msg header
@@ -101,6 +103,7 @@ class IMRTRobotSerial :
         
         # Send message
         self.serial_port_.write(tx_msg)
+
 
 
 
@@ -128,6 +131,30 @@ class IMRTRobotSerial :
 
 
 
+
+        # Returns latest measurement from distance sensor 2
+    def getDist3(self):
+        
+        self.mutex_.acquire()
+        dist = self.dist_3_
+        self.mutex_.release()
+        
+        return dist
+
+
+
+
+        # Returns latest measurement from distance sensor 2
+    def getDist4(self):
+        
+        self.mutex_.acquire()
+        dist = self.dist_4_
+        self.mutex_.release()
+        
+        return dist
+
+
+
         
     # Thread for receiving serial messages
     # This thread will run concurrently with other threads
@@ -146,8 +173,10 @@ class IMRTRobotSerial :
 
                 if crc_ok and rx_msg[0] == ord('f'):
                     self.mutex_.acquire()
-                    self.dist_1_ = (rx_msg[1] & 0xff) << 8 | (rx_msg[2] & 0xff)
-                    self.dist_2_ = (rx_msg[3] & 0xff) << 8 | (rx_msg[4] & 0xff)
+                    self.dist_1_ = (rx_msg[1] & 0xff)
+                    self.dist_2_ = (rx_msg[2] & 0xff)
+                    self.dist_3_ = (rx_msg[3] & 0xff)
+                    self.dist_4_ = (rx_msg[4] & 0xff)
                     self.mutex_.release()
   
 
