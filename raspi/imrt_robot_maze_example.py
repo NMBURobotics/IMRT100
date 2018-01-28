@@ -120,7 +120,8 @@ while not motor_serial.shutdown_now :
             print("Obstacle!")
             print("Turning right")
             turnRobot(RIGHT, 2.8)
-
+            
+            # Get sensor values
             dist_1 = motor_serial.getDist1()
             dist_2 = motor_serial.getDist2()
 
@@ -135,7 +136,7 @@ while not motor_serial.shutdown_now :
                 turnRobot(RIGHT, 1.4)
 
     else:
-        # If there is nothing in front of the robot it continus forwards
+        # If there is nothing in front of the robot it continus driving forwards
         driveRobot(FORWARDS, 0.1)
 
 
