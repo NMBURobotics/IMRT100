@@ -1,5 +1,7 @@
 # NMBU Robotics 2019
 # Author: Lars Grimstad
+# A simple module for communicating with the NMBU Robotics IMRT100 robots
+# through serial.
 
 
 import sys
@@ -18,7 +20,7 @@ class IMRTRobotSerial :
     # Constructor
     def __init__(self):
 
-        print("NMBU Robotics imrt100 motor serial")
+        print(__name__ + ": NMBU Robotics imrt100 motor serial")
         
         # Create an event for signaling threads when its time terminate the program
         self.run_event_ = threading.Event()
@@ -39,10 +41,10 @@ class IMRTRobotSerial :
         try :
             self.serial_port_ = serial.Serial(port_name, baudrate=115200, timeout=3)
         except :
-            print ("Could not open port: " + port_name + ". Is your robot connected?")
+            print (__name__ + ": Could not open port: " + port_name + ". Is your robot connected?")
             return False
 
-        print("Connected to: ", port_name)
+        print(__name__ + ": Connected to: ", port_name)
         return True
 
 
@@ -53,10 +55,15 @@ class IMRTRobotSerial :
         self.rx_thread_.start()
 
 
+
+
+    # Method for handling shutdown signals
     def shutdownSignal(self, signum, frame):
-        print("Shutdown signal received")
+        print(__name__ + ": Shutdown signal received")
         self.shutdown_now = True
         self.shutdown()
+
+
 
 
     # Method for gracefully shutting down serial receive thread
@@ -64,51 +71,6 @@ class IMRTRobotSerial :
         self.run_event_.clear()
         if blocking:
             self.rx_thread_.join()
-
-        
-        
-
-    # Checksum algorithm
-    # This algorithm takes in a list of bytes and returns a two byte checksum.
-    # The checksum is calculated and included in the message on the transmitting side.
-    # On the receiving side, the receiver calculates the checksum and compare the reulting value to the one included in the message.
-    # If the values match, we trust that the data contained in the message is uncorrupted
-    @staticmethod
-    def crc16(data_list) :
-        crc = 0x0000;
-        POLY = 0x8408
-      
-
-        if len(data_list) == 0 :
-            return (~crc)
-
-        for byte in data_list :
-            byte = 0xff & byte
-            for i in range(8) :
-                if ((crc & 0x0001) ^ (byte & 0x0001)) :
-                    crc = (crc >> 1) ^ POLY
-                else :
-                    crc = crc >> 1
-                byte = byte >> 1
-        
-        return (crc)
-
-
-
-
-    # Thread for receiving serial messages
-    # This thread will run concurrently with other threads
-    # This particular thread's only job is to listen to incomming messages
-    # The readline() function is set to block until it gets a newline character
-    # By hvaing it in a separate thread, it will not block other threads while waiting for incomming messages
-    def rxThread(self) :
-
-        while self.run_event_.is_set() :
-            rx_msg = self.serial_port_.readline()
-            if(len(rx_msg) > 0) :
-                print(rx_msg, '\n')
-
-        print("Serial receive thread has finished")
 
 
 
@@ -139,7 +101,53 @@ class IMRTRobotSerial :
         self.serial_port_.write(tx_msg)
 
 
+
+        
+    # Thread for receiving serial messages
+    # This thread will run concurrently with other threads
+    # This particular thread's only job is to listen to incomming messages
+    # The readline() function is set to block until it gets a newline character
+    # By hvaing it in a separate thread, it will not block other threads while waiting for incomming messages
+    def rxThread(self) :
+
+        while self.run_event_.is_set() :
+            rx_msg = self.serial_port_.readline()
+            if(len(rx_msg) > 0) :
+                print(rx_msg, '\n')
+
+        print(__name__ + ": Serial receive thread has finished")
+        
+        
+
+
+    # Checksum algorithm
+    # This algorithm takes in a list of bytes and returns a two byte checksum.
+    # The checksum is calculated and included in the message on the transmitting side.
+    # On the receiving side, the receiver calculates the checksum and compare the reulting value to the one included in the message.
+    # If the values match, we trust that the data contained in the message is uncorrupted
+    @staticmethod
+    def crc16(data_list) :
+        crc = 0x0000;
+        POLY = 0x8408
+      
+
+        if len(data_list) == 0 :
+            return (~crc)
+
+        for byte in data_list :
+            byte = 0xff & byte
+            for i in range(8) :
+                if ((crc & 0x0001) ^ (byte & 0x0001)) :
+                    crc = (crc >> 1) ^ POLY
+                else :
+                    crc = crc >> 1
+                byte = byte >> 1
+        
+        return (crc)
+
           
+
+
 
 
 
@@ -167,14 +175,10 @@ def main(argv) :
 
     # Now we will send some motor commands until the program is terminated by the user
     speed = 0
-    try :
-        while True :
+    while not motor_serial.shutdown_now :
             speed = (speed + 10) % 400
             motor_serial.sendCommand(speed, 400-speed)
             time.sleep(0.1)
-
-    except KeyboardInterrupt :
-        print("Shutting down threads")
 
 
     # Exit
