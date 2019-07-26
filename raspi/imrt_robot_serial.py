@@ -6,11 +6,12 @@ import sys
 import serial
 import threading
 import time
+import signal
 
 
 
 # Class for communicating with the NMBU IMRT100 robot
-class MotorSerialRaspi :
+class IMRTRobotSerial :
 
     MSG_SIZE = 10
 
@@ -22,6 +23,10 @@ class MotorSerialRaspi :
         # Create an event for signaling threads when its time terminate the program
         self.run_event_ = threading.Event()
         self.run_event_.set()
+
+        self.shutdown_now = False
+        signal.signal(signal.SIGINT, self.shutdownSignal)
+        
 
         # Thread for receiving data through serial
         self.rx_thread_ = threading.Thread(target=self.rxThread)
@@ -48,6 +53,10 @@ class MotorSerialRaspi :
         self.rx_thread_.start()
 
 
+    def shutdownSignal(self, signum, frame):
+        print("Shutdown signal received")
+        self.shutdown_now = True
+        self.shutdown()
 
 
     # Method for gracefully shutting down serial receive thread
@@ -144,7 +153,7 @@ def main(argv) :
         port_name = argv[1]
 
     # Create motor serial object
-    motor_serial = MotorSerialRaspi()
+    motor_serial = IMRTRobotSerial()
 
     # Open serial port, exit if serial port can't be opened
     connected = motor_serial.connect(port_name)
