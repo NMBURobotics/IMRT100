@@ -11,10 +11,13 @@
 
 #define POLY 0x8408
 
+#define CMD_MSG_TIMEOUT_DURATION 500
+
 DualVNH5019MotorShield md;
 
 
 unsigned long next_cmd_time_;
+unsigned long prev_cmd_msg_time_;
 int m1_cmd_ = 0;
 int m2_cmd_ = 0;
 int target_v1_ = 0;
@@ -101,34 +104,62 @@ unsigned short crc16(char *data_p, unsigned short length)
 void setup()
 {
   Serial.begin(115200);
-  Serial.println("Dual VNH5019 Motor Shield");
   md.init();
   next_cmd_time_ = millis();
+  prev_cmd_msg_time_ = millis() + CMD_MSG_TIMEOUT_DURATION;
 }
 
 void loop()
 {
-    unsigned long current_time = millis();
 
-    if (msg_complete_)
+  // Get current time
+  unsigned long current_time = millis();
+
+  // Check if we have received a complete message through serial
+  // if we have, we set target speed as specified in msg
+  if (msg_complete_)
+  {
+    // Calculate checksum and compare to the checksum included in message
+    unsigned short crc_msg = ( (rx_buffer_[MSG_SIZE-3] & 0xff) << 8 ) | ( (rx_buffer_[MSG_SIZE-2] & 0xff) );
+    unsigned short crc_calc = crc16(rx_buffer_, MSG_SIZE - 3);
+
+    // If the checkums match, we accept the command
+    if (crc_msg == crc_calc)
     {
-      target_v1_ = (int)( (rx_buffer_[1] << 8) | (rx_buffer_[2]) );
-      target_v2_ = (int)( (rx_buffer_[3] << 8) | (rx_buffer_[4]) );
-      msg_complete_ = false;
+      target_v1_ = ( (rx_buffer_[1] & 0xff) << 8 ) | ( (rx_buffer_[2] & 0xff) );
+      target_v2_ = ( (rx_buffer_[3] & 0xff) << 8 ) | ( (rx_buffer_[4] & 0xff) );
+      prev_cmd_msg_time_ = current_time;
     }
-
-    if (current_time > next_cmd_time_)
+    else
     {
-      m1_cmd_ = calculateCommand(m1_cmd_, target_v1_);
-      m2_cmd_ = calculateCommand(m2_cmd_, target_v2_);
-      next_cmd_time_ += 1000 / CMD_RATE;
-
+      Serial.println("BAD CRC!");
     }
-    
-    md.setM1Speed(m1_cmd_);
-    md.setM2Speed(m2_cmd_);
-    stopIfFault();
-    
+    msg_complete_ = false;
+  }
+
+
+  // If we stop receiving serial messages we want the target speed to be zero
+  if (current_time > prev_cmd_msg_time_ + CMD_MSG_TIMEOUT_DURATION)
+  {
+    target_v1_ = 0;
+    target_v2_ = 0;
+  }
+
+
+  // We want to update commands at a set frequency
+  if (current_time > next_cmd_time_)
+  {
+    m1_cmd_ = calculateCommand(m1_cmd_, target_v1_);
+    m2_cmd_ = calculateCommand(m2_cmd_, target_v2_);
+    next_cmd_time_ += 1000 / CMD_RATE;
+  }
+
+
+  // Send commands to motor controller
+  md.setM1Speed(m1_cmd_);
+  md.setM2Speed(m2_cmd_);
+  stopIfFault();
+  
     
 
 
