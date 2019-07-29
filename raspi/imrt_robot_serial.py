@@ -21,6 +21,13 @@ class IMRTRobotSerial :
     def __init__(self):
 
         print(__name__ + ": NMBU Robotics imrt100 motor serial")
+
+        # Mutex
+        self.mutex_ = threading.Lock()
+
+        # Sonic members
+        self.dist_1_ = 0
+        self.dist_2_ = 0
         
         # Create an event for signaling threads when its time terminate the program
         self.run_event_ = threading.Event()
@@ -38,12 +45,7 @@ class IMRTRobotSerial :
         
     # Method for opening serial port
     def connect(self, port_name="/dev/ttyACM0"):
-        try :
-            self.serial_port_ = serial.Serial(port_name, baudrate=115200, timeout=3)
-        except :
-            print (__name__ + ": Could not open port: " + port_name + ". Is your robot connected?")
-            return False
-
+        self.serial_port_ = serial.Serial(port_name, baudrate=115200, timeout=3)
         print(__name__ + ": Connected to: ", port_name)
         return True
 
@@ -102,6 +104,30 @@ class IMRTRobotSerial :
 
 
 
+
+    # Returns latest measurement from distance sensor 1
+    def getDist1(self):
+        
+        mutex_.acquire()
+        dist = self.dist_1_
+        mutex_.release()
+        
+        return dist
+
+
+
+
+    # Returns latest measurement from distance sensor 2
+    def getDist2(self):
+        
+        mutex_.acquire()
+        dist = self.dist_2_
+        mutex_.release()
+        
+        return dist
+
+
+
         
     # Thread for receiving serial messages
     # This thread will run concurrently with other threads
@@ -112,8 +138,18 @@ class IMRTRobotSerial :
 
         while self.run_event_.is_set() :
             rx_msg = self.serial_port_.readline()
-            if(len(rx_msg) > 0) :
-                print(rx_msg, '\n')
+            
+            if(len(rx_msg) == self.MSG_SIZE) :
+                crc_calc = self.crc16(rx_msg[0:-3])
+                crc_msg = (rx_msg[-3] & 0xff) << 8 | (rx_msg[-2] & 0xff)
+                crc_ok = (crc_calc == crc_msg)
+
+                if crc_ok and rx_msg[0] == ord('f'):
+                    self.dist_1_ = (rx_msg[1] & 0xff) << 8 | (rx_msg[2] & 0xff)
+                    self.dist_2_ = (rx_msg[3] & 0xff) << 8 | (rx_msg[4] & 0xff)
+
+            #print(self.dist_1_, self.dist_2_)
+
 
         print(__name__ + ": Serial receive thread has finished")
         
