@@ -5,6 +5,12 @@
 import imrt_robot_serial
 import signal
 import time
+import sys
+
+
+# We want our program to send commands at 10 Hz (10 commands per second)
+execution_frequency = 10 #Hz
+execution_period = 1. / execution_frequency #seconds
 
 
 # Create motor serial object
@@ -12,8 +18,10 @@ motor_serial = imrt_robot_serial.IMRTRobotSerial()
 
 
 # Open serial port. Exit if serial port cannot be opened
-if not motor_serial.connect("/dev/ttyACM0"):
-    print("Exiting program")
+try:
+    motor_serial.connect("/dev/ttyACM0")
+except:
+    print("Could not open port. Is your robot connected?\nExiting program")
     sys.exit()
 
     
@@ -29,8 +37,13 @@ while not motor_serial.shutdown_now :
 
 
     ###############################################################
-    # This is the start of our loop. Your code goes below         #
+    # This is the start of our loop. Your code goes below.        #
+    #                                                             #
     # An example is provided to give you a starting point         #
+    # In this example we get the distance readings from each of   #
+    # the two distance sensors. Then we multiply each reading     #
+    # with a constant gain and use the two resulting numbers      #
+    # as commands for each of the two motors.                     #
     #  ________________________________________________________   #
     # |                                                        |  #
     # V                                                           #
@@ -38,17 +51,40 @@ while not motor_serial.shutdown_now :
     ###############################################################
 
 
-    # Preparing commands for our motors
-    speed_motor_1 = 300
-    speed_motor_2 = 150
+    # Get the current time
+    iteration_start_time = time.time()
+
+
+    # Get and print readings from distance sensors
+    dist_1 = motor_serial.getDist1()
+    dist_2 = motor_serial.getDist2()
+    print("Dist 1:", dist_1, "   Dist 2:", dist_2)
+
+    
+
+    # Calculate commands for each motor using sensor readings
+    # In this simple example we will multiply each sensor reading
+    # with a constant to obtain our commands
+    gain = 8
+    speed_motor_1 = dist_1 * gain
+    speed_motor_2 = dist_2 * gain
+
 
 
     # Send commands to motor
+    # Max speed is 400.
+    # E.g.a command of 500 will result in the same speed as if the command was 400
     motor_serial.sendCommand(speed_motor_1, speed_motor_2)
 
 
-    # Sleep for 0.1 seconds
-    time.sleep(0.1)
+
+    # Here we pause the execution of the program for the apropriate amout of time
+    # so that our loop executes at the frequency specified by the variable execution_frequency
+    iteration_end_time = time.time() # current time
+    iteration_duration = iteration_end_time - iteration_start_time # time spent executing code
+    if (iteration_duration < execution_period):
+        time.sleep(execution_period - iteration_duration)
+
 
 
     ###############################################################
