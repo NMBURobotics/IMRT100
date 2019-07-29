@@ -108,9 +108,9 @@ class IMRTRobotSerial :
     # Returns latest measurement from distance sensor 1
     def getDist1(self):
         
-        mutex_.acquire()
+        self.mutex_.acquire()
         dist = self.dist_1_
-        mutex_.release()
+        self.mutex_.release()
         
         return dist
 
@@ -120,9 +120,9 @@ class IMRTRobotSerial :
     # Returns latest measurement from distance sensor 2
     def getDist2(self):
         
-        mutex_.acquire()
+        self.mutex_.acquire()
         dist = self.dist_2_
-        mutex_.release()
+        self.mutex_.release()
         
         return dist
 
@@ -145,13 +145,14 @@ class IMRTRobotSerial :
                 crc_ok = (crc_calc == crc_msg)
 
                 if crc_ok and rx_msg[0] == ord('f'):
+                    self.mutex_.acquire()
                     self.dist_1_ = (rx_msg[1] & 0xff) << 8 | (rx_msg[2] & 0xff)
                     self.dist_2_ = (rx_msg[3] & 0xff) << 8 | (rx_msg[4] & 0xff)
+                    self.mutex_.release()
+  
 
-            #print(self.dist_1_, self.dist_2_)
 
-
-        print(__name__ + ": Serial receive thread has finished")
+        print(__name__ + ": Serial receive thread has finished cleanly")
         
         
 
