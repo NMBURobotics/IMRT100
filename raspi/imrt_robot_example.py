@@ -55,6 +55,7 @@ while not motor_serial.shutdown_now :
     iteration_start_time = time.time()
 
 
+
     # Get and print readings from distance sensors
     dist_1 = motor_serial.getDist1()
     dist_2 = motor_serial.getDist2()
