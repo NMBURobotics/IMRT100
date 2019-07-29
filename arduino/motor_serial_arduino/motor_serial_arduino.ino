@@ -1,4 +1,5 @@
 #include "DualVNH5019MotorShield.h"
+#include "NewPing.h"
 
 
 
@@ -6,6 +7,7 @@
 #define V_STEP 25
 
 #define CMD_RATE 40
+#define FEEDBACK_RATE 10
 
 #define MSG_SIZE 10
 
@@ -13,10 +15,19 @@
 
 #define CMD_MSG_TIMEOUT_DURATION 500
 
+
+#define SONIC_NUM 2
+#define MAX_DISTANCE 300
+
+NewPing sonics_[SONIC_NUM] = {NewPing( 3,  3, MAX_DISTANCE),
+                              NewPing(11, 11, MAX_DISTANCE)
+                             };
+
 DualVNH5019MotorShield md;
 
 
 unsigned long next_cmd_time_;
+unsigned long next_feedback_time_;
 unsigned long prev_cmd_msg_time_;
 int m1_cmd_ = 0;
 int m2_cmd_ = 0;
@@ -106,6 +117,7 @@ void setup()
   Serial.begin(115200);
   md.init();
   next_cmd_time_ = millis();
+  next_feedback_time_ = millis();
   prev_cmd_msg_time_ = millis() + CMD_MSG_TIMEOUT_DURATION;
 }
 
@@ -159,6 +171,31 @@ void loop()
   md.setM1Speed(m1_cmd_);
   md.setM2Speed(m2_cmd_);
   stopIfFault();
+
+
+  // Get and transmit feedback
+  if (current_time > next_feedback_time_)
+  {
+    int sonic_1 = sonics_[0].ping_cm();
+    int sonic_2 = sonics_[1].ping_cm();
+    
+    char tx_msg[MSG_SIZE];
+    tx_msg[0] = 'f';
+    tx_msg[1] = (sonic_1 >> 8) & 0xff;
+    tx_msg[2] = (sonic_1) & 0xff;
+    tx_msg[3] = (sonic_2 >> 8) & 0xff;
+    tx_msg[4] = (sonic_2) & 0xff;
+    tx_msg[MSG_SIZE - 1] = '\n';
+
+    short crc = crc16(tx_msg, MSG_SIZE - 3);
+    
+    tx_msg[MSG_SIZE - 3] = (crc >> 8) & 0xff;
+    tx_msg[MSG_SIZE - 2] = (crc) & 0xff;
+
+    Serial.write(tx_msg, MSG_SIZE);
+    
+    next_feedback_time_ += 1000 / FEEDBACK_RATE;
+  }
   
     
 
