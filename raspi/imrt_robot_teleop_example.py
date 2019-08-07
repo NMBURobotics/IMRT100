@@ -13,6 +13,7 @@ import imrt_robot_serial
 import signal
 import sys
 import bluedot
+import time
 
 
 
@@ -29,6 +30,7 @@ def move(pos):
     # use pos.x, pos.y and pos.distance to determin vx and wz
     vx = pos.distance * (1,-1)[pos.y > 0]
     wz = pos.x
+    print(vx, wz)
 
     # calculate motor commands
     v1 = ( 2 * vx - ROBOT_WIDTH * wz ) / 2 * 400
@@ -74,17 +76,40 @@ if __name__ == '__main__':
     bd = bluedot.BlueDot()
    
     
-    # Set up which functions to call on events
-    bd.when_pressed = move
-    bd.when_moved = move
-    bd.when_released = stop
-    
-    
-    # Wait for something to happen
-    signal.pause()
 
-      
+    
+    # Loop forever
+    while not motor_serial.shutdown_now:
+
+        v1 = 0
+        v2 = 0
+        
+        if bd.is_pressed:
+
+            # use pos.x, pos.y and pos.distance to determin vx and wz
+            vx = bd.position.distance * (1,-1)[bd.position.y > 0]
+            wz = bd.position.x * (1,-1)[bd.position.y > 0]
+            print(vx, wz)
+
+            # calculate motor commands
+            v1 = ( 2 * vx - ROBOT_WIDTH * wz ) / 2 * 400
+            v2 = ( 2 * vx + ROBOT_WIDTH * wz ) / 2 * 400
+
+
+            
+        # send motor commands
+        motor_serial.sendCommand(int(v1), int(v2))
+
+
+        # sleep for 0.05 seconds
+        time.sleep(0.05)
+
+
+
+    # End of program
     print("Goodbye")
+            
+
 
 
 
