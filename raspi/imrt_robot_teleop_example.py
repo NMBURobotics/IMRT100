@@ -24,30 +24,6 @@ ROBOT_WIDTH = 0.40 # m
 
 
 
-# Function to make the robot move
-def move(pos):
-
-    # use pos.x, pos.y and pos.distance to determin vx and wz
-    vx = pos.distance * (1,-1)[pos.y > 0]
-    wz = pos.x
-    print(vx, wz)
-
-    # calculate motor commands
-    v1 = ( 2 * vx - ROBOT_WIDTH * wz ) / 2 * 400
-    v2 = ( 2 * vx + ROBOT_WIDTH * wz ) / 2 * 400
-    
-    # send motor commands
-    motor_serial.send_command(int(v1), int(v2))
-
-
-
-
-# Function to make the robot stop
-def stop():
-    motor_serial.send_command(0, 0)
-
-
-
 
 ##################################################
 # This is where our program will start executing #
