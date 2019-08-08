@@ -16,34 +16,34 @@ DRIVING_SPEED = 100
 TURNING_SPEED = 100
 STOP_DISTANCE = 25
 
-def stopRobot(duration):
+def stop_robot(duration):
 
     iterations = int(duration * 10)
     
     for i in range(iterations):
-        motor_serial.sendCommand(0, 0)
+        motor_serial.send_command(0, 0)
         time.sleep(0.10)
 
 
 
-def driveRobot(direction, duration):
+def drive_robot(direction, duration):
     
     speed = DRIVING_SPEED * direction
     iterations = int(duration * 10)
 
     for i in range(iterations):
-        motor_serial.sendCommand(speed, speed)
+        motor_serial.send_command(speed, speed)
         time.sleep(0.10)
 
 
 
-def turnRobotRandomAngle():
+def turn_robot_random_angle():
 
     direction = random.choice([-1,1])
     iterations = random.randint(10, 25)
     
     for i in range(iterations):
-        motor_serial.sendCommand(TURNING_SPEED * direction, -TURNING_SPEED * direction)
+        motor_serial.send_command(TURNING_SPEED * direction, -TURNING_SPEED * direction)
         time.sleep(0.10)
 
 
@@ -96,8 +96,8 @@ while not motor_serial.shutdown_now :
 
 
     # Get and print readings from distance sensors
-    dist_1 = motor_serial.getDist1()
-    dist_2 = motor_serial.getDist2()
+    dist_1 = motor_serial.get_dist_1()
+    dist_2 = motor_serial.get_dist_2()
     print("Dist 1:", dist_1, "   Dist 2:", dist_2)
 
     # Check if there is an obstacle in the way
@@ -105,18 +105,18 @@ while not motor_serial.shutdown_now :
         # There is an obstacle in front of the robot
         # First let's stop the robot for 1 second
         print("Obstacle!")
-        stopRobot(1)
+        stop_robot(1)
 
         # Reverse for 0.5 second
-        driveRobot(BACKWARDS, 0.5)
+        drive_robot(BACKWARDS, 0.5)
 
         # Turn random angle
-        turnRobotRandomAngle()
+        turn_robot_random_angle()
         
 
     else:
         # If there is nothing in front of the robot it continus driving forwards
-        driveRobot(FORWARDS, 0.1)
+        drive_robot(FORWARDS, 0.1)
 
 
         

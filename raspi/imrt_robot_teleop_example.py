@@ -37,14 +37,14 @@ def move(pos):
     v2 = ( 2 * vx + ROBOT_WIDTH * wz ) / 2 * 400
     
     # send motor commands
-    motor_serial.sendCommand(int(v1), int(v2))
+    motor_serial.send_command(int(v1), int(v2))
 
 
 
 
 # Function to make the robot stop
 def stop():
-    motor_serial.sendCommand(0, 0)
+    motor_serial.send_command(0, 0)
 
 
 
@@ -87,7 +87,7 @@ if __name__ == '__main__':
         if bd.is_pressed:
 
             # use pos.x, pos.y and pos.distance to determin vx and wz
-            vx = bd.position.distance * (1,-1)[bd.position.y > 0]
+            vx = bd.position.distance * (-1,1)[bd.position.y > 0]
             wz = bd.position.x * (1,-1)[bd.position.y > 0]
             print(vx, wz)
 
@@ -98,7 +98,7 @@ if __name__ == '__main__':
 
             
         # send motor commands
-        motor_serial.sendCommand(int(v1), int(v2))
+        motor_serial.send_command(int(v1), int(v2))
 
 
         # sleep for 0.05 seconds

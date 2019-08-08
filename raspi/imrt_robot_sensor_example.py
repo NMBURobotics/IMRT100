@@ -57,8 +57,8 @@ while not motor_serial.shutdown_now :
 
 
     # Get and print readings from distance sensors
-    dist_1 = motor_serial.getDist1()
-    dist_2 = motor_serial.getDist2()
+    dist_1 = motor_serial.get_dist_1()
+    dist_2 = motor_serial.get_dist_2()
     print("Dist 1:", dist_1, "   Dist 2:", dist_2)
 
     
@@ -75,7 +75,7 @@ while not motor_serial.shutdown_now :
     # Send commands to motor
     # Max speed is 400.
     # E.g.a command of 500 will result in the same speed as if the command was 400
-    motor_serial.sendCommand(speed_motor_1, speed_motor_2)
+    motor_serial.send_command(speed_motor_1, speed_motor_2)
 
 
 
