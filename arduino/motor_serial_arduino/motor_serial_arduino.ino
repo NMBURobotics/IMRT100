@@ -16,11 +16,13 @@
 #define CMD_MSG_TIMEOUT_DURATION 500
 
 
-#define SONIC_NUM 2
-#define MAX_DISTANCE 300
+#define SONIC_NUM 4
+#define MAX_DISTANCE 255
 
 NewPing sonics_[SONIC_NUM] = {NewPing( 3,  3, MAX_DISTANCE),
-                              NewPing(11, 11, MAX_DISTANCE)
+                              NewPing(11, 11, MAX_DISTANCE),
+                              NewPing(A2, A2, MAX_DISTANCE),
+                              NewPing(A3, A3, MAX_DISTANCE)                          
                              };
 
 DualVNH5019MotorShield md;
@@ -178,13 +180,24 @@ void loop()
   {
     int sonic_1 = sonics_[0].ping_cm();
     int sonic_2 = sonics_[1].ping_cm();
+    int sonic_3 = sonics_[2].ping_cm();
+    int sonic_4 = sonics_[3].ping_cm();
+    
+    if (sonic_1 == 0)
+      sonic_1 = MAX_DISTANCE;
+    if (sonic_2 == 0)
+      sonic_2 = MAX_DISTANCE;
+    if (sonic_3 == 0)
+      sonic_3 = MAX_DISTANCE;
+    if (sonic_4 == 0)
+      sonic_4 = MAX_DISTANCE;
     
     char tx_msg[MSG_SIZE];
     tx_msg[0] = 'f';
-    tx_msg[1] = (sonic_1 >> 8) & 0xff;
-    tx_msg[2] = (sonic_1) & 0xff;
-    tx_msg[3] = (sonic_2 >> 8) & 0xff;
-    tx_msg[4] = (sonic_2) & 0xff;
+    tx_msg[1] = (sonic_1) & 0xff;
+    tx_msg[2] = (sonic_2) & 0xff;
+    tx_msg[3] = (sonic_3) & 0xff;
+    tx_msg[4] = (sonic_4) & 0xff;
     tx_msg[MSG_SIZE - 1] = '\n';
 
     short crc = crc16(tx_msg, MSG_SIZE - 3);
