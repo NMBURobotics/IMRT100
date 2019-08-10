@@ -23,22 +23,24 @@ class IMRTRobotSerial :
         print(__name__ + ": NMBU Robotics imrt100 motor serial")
 
         # Mutex
-        self.mutex_ = threading.Lock()
+        self._mutex = threading.Lock()
 
         # Sonic members
-        self.dist_1_ = 0
-        self.dist_2_ = 0
+        self._dist_1 = 255
+        self._dist_2 = 255
+        self._dist_3 = 255
+        self._dist_4 = 255
         
         # Create an event for signaling threads when its time terminate the program
-        self.run_event_ = threading.Event()
-        self.run_event_.set()
+        self._run_event = threading.Event()
+        self._run_event.set()
 
         self.shutdown_now = False
-        signal.signal(signal.SIGINT, self.shutdownSignal)
+        signal.signal(signal.SIGINT, self._shutdown_signal)
         
 
         # Thread for receiving data through serial
-        self.rx_thread_ = threading.Thread(target=self.rxThread)
+        self._rx_thread_ = threading.Thread(target=self._rx_thread)
 
 
 
@@ -54,37 +56,37 @@ class IMRTRobotSerial :
     
     # Method for starting serial receive thread
     def run(self):
-        self.rx_thread_.start()
+        self._rx_thread_.start()
 
 
 
 
-    # Method for handling shutdown signals
-    def shutdownSignal(self, signum, frame):
+    # Method for handling _shutdown signals
+    def _shutdown_signal(self, signum, frame):
         print(__name__ + ": Shutdown signal received")
         self.shutdown_now = True
-        self.shutdown()
+        self._shutdown()
 
 
 
 
     # Method for gracefully shutting down serial receive thread
-    def shutdown(self, blocking=True):
-        self.run_event_.clear()
+    def _shutdown(self, blocking=True):
+        self._run_event.clear()
         if blocking:
-            self.rx_thread_.join()
+            self._rx_thread_.join()
 
 
 
 
     # Method for transmitting commands through serial
-    def sendCommand(self, cmd_1, cmd_2) :
+    def send_command(self, cmd_1, cmd_2) :
         
         # Here we create and populate the message we want to send to the motor controller
         # Our message will contain the following 10 bytes:
         # [header, cmd1_high, cmd1_low, cmd2_high, cmd2_low, not_used, not_used, checksum_high, checksum_low, newline]
         # Values that cannot fit into one byte are split into two bytes (xx_high, xx_low) using bitwise logic
-        
+
         tx_msg = [0] * self.MSG_SIZE
 
         tx_msg[0]  = ord('c')               # msg header
@@ -94,7 +96,7 @@ class IMRTRobotSerial :
         tx_msg[4]  = (cmd_2) & 0xff         # command, motor 2 low
         tx_msg[-1] = ord('\n')              # finish message with newline
 
-        crc = self.crc16(tx_msg[0:-3])      # calculate checksum
+        crc = self._crc16(tx_msg[0:-3])      # calculate checksum
         tx_msg[-3] = (crc >> 8) & 0xff      # checksum high
         tx_msg[-2] = (crc) & 0xff           # checksum low
 
@@ -105,12 +107,13 @@ class IMRTRobotSerial :
 
 
 
+
     # Returns latest measurement from distance sensor 1
-    def getDist1(self):
+    def get_dist_1(self):
         
-        self.mutex_.acquire()
-        dist = self.dist_1_
-        self.mutex_.release()
+        self._mutex.acquire()
+        dist = self._dist_1
+        self._mutex.release()
         
         return dist
 
@@ -118,11 +121,35 @@ class IMRTRobotSerial :
 
 
     # Returns latest measurement from distance sensor 2
-    def getDist2(self):
+    def get_dist_2(self):
         
-        self.mutex_.acquire()
-        dist = self.dist_2_
-        self.mutex_.release()
+        self._mutex.acquire()
+        dist = self._dist_2
+        self._mutex.release()
+        
+        return dist
+
+
+
+
+    # Returns latest measurement from distance sensor 2
+    def get_dist_3(self):
+        
+        self._mutex.acquire()
+        dist = self._dist_3
+        self._mutex.release()
+        
+        return dist
+
+
+
+
+    # Returns latest measurement from distance sensor 2
+    def get_dist_4(self):
+        
+        self._mutex.acquire()
+        dist = self._dist_4
+        self._mutex.release()
         
         return dist
 
@@ -134,21 +161,23 @@ class IMRTRobotSerial :
     # This particular thread's only job is to listen to incomming messages
     # The readline() function is set to block until it gets a newline character
     # By hvaing it in a separate thread, it will not block other threads while waiting for incomming messages
-    def rxThread(self) :
+    def _rx_thread(self) :
 
-        while self.run_event_.is_set() :
+        while self._run_event.is_set() :
             rx_msg = self.serial_port_.readline()
             
             if(len(rx_msg) == self.MSG_SIZE) :
-                crc_calc = self.crc16(rx_msg[0:-3])
+                crc_calc = self._crc16(rx_msg[0:-3])
                 crc_msg = (rx_msg[-3] & 0xff) << 8 | (rx_msg[-2] & 0xff)
                 crc_ok = (crc_calc == crc_msg)
 
                 if crc_ok and rx_msg[0] == ord('f'):
-                    self.mutex_.acquire()
-                    self.dist_1_ = (rx_msg[1] & 0xff) << 8 | (rx_msg[2] & 0xff)
-                    self.dist_2_ = (rx_msg[3] & 0xff) << 8 | (rx_msg[4] & 0xff)
-                    self.mutex_.release()
+                    self._mutex.acquire()
+                    self._dist_1 = (rx_msg[1] & 0xff)
+                    self._dist_2 = (rx_msg[2] & 0xff)
+                    self._dist_3 = (rx_msg[3] & 0xff)
+                    self._dist_4 = (rx_msg[4] & 0xff)
+                    self._mutex.release()
   
 
 
@@ -163,7 +192,7 @@ class IMRTRobotSerial :
     # On the receiving side, the receiver calculates the checksum and compare the reulting value to the one included in the message.
     # If the values match, we trust that the data contained in the message is uncorrupted
     @staticmethod
-    def crc16(data_list) :
+    def _crc16(data_list) :
         crc = 0x0000;
         POLY = 0x8408
       
@@ -214,12 +243,12 @@ def main(argv) :
     speed = 0
     while not motor_serial.shutdown_now :
             speed = (speed + 10) % 400
-            motor_serial.sendCommand(speed, 400-speed)
+            motor_serial.send_command(speed, 400-speed)
             time.sleep(0.1)
 
 
     # Exit
-    motor_serial.shutdown()
+    motor_serial._shutdown()
     print("Exiting program")
 
 
