@@ -248,7 +248,7 @@ void serialEvent()
       next_write_ = 0;
     }
     
-    
+    bytes_read++; 
   }
 
 }
