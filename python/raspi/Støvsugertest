@@ -6,6 +6,46 @@ import imrt_robot_serial
 import signal
 import time
 import sys
+import random
+
+LEFT = -1
+RIGHT = 1
+FORWARDS = 1
+BACKWARDS = -1
+DRIVING_SPEED = 100
+TURNING_SPEED = 100
+STOP_DISTANCE = 25
+
+def stop_robot(duration):
+
+    iterations = int(duration * 10)
+    
+    for i in range(iterations):
+        motor_serial.send_command(0, 0)
+        time.sleep(0.10)
+
+
+
+def drive_robot(direction, duration):
+    
+    speed = DRIVING_SPEED * direction
+    iterations = int(duration * 10)
+
+    for i in range(iterations):
+        motor_serial.send_command(speed, speed)
+        time.sleep(0.10)
+
+
+
+def turn_robot_random_angle():
+
+    direction = random.choice([-1,1])
+    iterations = random.randint(10, 25)
+    
+    for i in range(iterations):
+        motor_serial.send_command(TURNING_SPEED * direction, -TURNING_SPEED * direction)
+        time.sleep(0.10)
+
 
 
 # We want our program to send commands at 10 Hz (10 commands per second)
@@ -51,49 +91,39 @@ while not motor_serial.shutdown_now :
     ###############################################################
 
 
-    # Get the current time
-    iteration_start_time = time.time()
+
 
 
 
     # Get and print readings from distance sensors
-    #Sensor bak
     dist_1 = motor_serial.get_dist_1()
-    #Sensor venstre
     dist_2 = motor_serial.get_dist_2()
-    #Sensor høyre
     dist_3 = motor_serial.get_dist_3()
-    #Sensor foran
     dist_4 = motor_serial.get_dist_4()
-    print("Bak:", dist_1, "   Venstre", dist_2,  "  Høyre:", dist_3, "   Foran:", dist_4)
 
-    
+    print("Dist 1:", dist_1, "   Dist 2:", dist_2, Dist 3:", dist_3, "   Dist 4:", dist_4)
 
-    # Calculate commands for each motor using sensor readings
-    # In this simple example we will multiply each sensor reading
-    # with a constant to obtain our commands
-    gain = 1
-    
-    #Venstre
-    speed_motor_1 = dist_3 * gain
-    #Høyre
-    speed_motor_2 = dist_2 * gain
+    # Check if there is an obstacle in the way
+    if dist_3 < STOP_DISTANCE or dist_2 < STOP_DISTANCE or dist_4 < STOP_DISTANCE:
+        # There is an obstacle in front of the robot
+        # First let's stop the robot for 1 second
+        print("Obstacle!")
+        stop_robot(1)
+
+        # Reverse for 0.5 second
+        drive_robot(BACKWARDS, 0.5)
+
+        # Turn random angle
+        turn_robot_random_angle()
+        
+
+    else:
+        # If there is nothing in front of the robot it continus driving forwards
+        drive_robot(FORWARDS, 0.1)
 
 
-
-    # Send commands to motor
-    # Max speed is 400.
-    # E.g.a command of 500 will result in the same speed as if the command was 400
-    motor_serial.send_command(speed_motor_1, speed_motor_2)
-
-
-
-    # Here we pause the execution of the program for the apropriate amout of time
-    # so that our loop executes at the frequency specified by the variable execution_frequency
-    iteration_end_time = time.time() # current time
-    iteration_duration = iteration_end_time - iteration_start_time # time spent executing code
-    if (iteration_duration < execution_period):
-        time.sleep(execution_period - iteration_duration)
+        
+                
 
 
 
