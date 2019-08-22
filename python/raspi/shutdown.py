@@ -1,20 +1,36 @@
-import RPi.GPIO as GPIO
+#!/usr/bin/env python3
+
 import os
-import signal
 import time
+import RPi.GPIO as GPIO
 
-def buttonCallback(channel):
-    print("Button was pressed")
-    time.sleep(2)
-    if not GPIO.input(19):
-        print("...and thats 2 seconds")
-        os.system("shutdown now -h")
+DELAY = 4
+BUT_PIN = 14
 
-GPIO.setwarnings(True)
 GPIO.setmode(GPIO.BCM)
-GPIO.setup(19, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-GPIO.add_event_detect(19,GPIO.FALLING,callback=buttonCallback, bouncetime=400)
+GPIO.setup(BUT_PIN, GPIO.IN, GPIO.PUD_UP)
 
-signal.pause()
+
+print("Listening to shutdown button")
+looping = True
+last_ok = time.time()
+
+
+while looping:
+    
+  current_but = GPIO.input(BUT_PIN)
+  
+  if current_but:
+      last_ok = time.time()
+
+  if time.time() > last_ok + DELAY:
+      print("Button shutdown")
+      looping = False
+      
+  time.sleep(0.1)
+
+  
 GPIO.cleanup()
 
+print("BYE!")
+os.system("shutdown now -h")
