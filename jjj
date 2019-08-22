@@ -1,0 +1,53 @@
+# NMBU Robotics 2019
+# Author: Lars Grimstad
+# A simple module for communicating with the NMBU Robotics IMRT100 robots
+# through serial.
+
+
+import sys
+import serial
+import threading
+import time
+import signal
+
+
+
+# Class for communicating with the NMBU IMRT100 robot
+class IMRTRobotSerial :
+
+    MSG_SIZE = 10
+
+    # Constructor
+    def __init__(self):
+
+        print(__name__ + ": NMBU Robotics imrt100 motor serial")
+
+        # Mutex
+        self._mutex = threading.Lock()
+
+        # Sonic members
+        self._dist_1 = 255
+        self._dist_2 = 255
+        self._dist_3 = 255
+        self._dist_4 = 255
+        
+        # Create an event for signaling threads when its time terminate the program
+        self._run_event = threading.Event()
+        self._run_event.set()
+
+        self.shutdown_now = False
+        signal.signal(signal.SIGINT, self._shutdown_signal)
+        
+
+        # Thread for receiving data through serial
+        self._rx_thread_ = threading.Thread(target=self._rx_thread)
+
+
+
+        
+    # Method for opening serial port
+    def connect(self, port_name="/dev/ttyACM0"):
+        self.serial_port_ = serial.Serial(port_name, baudrate=115200, timeout=3)
+        print(__name__ + ": Connected to: ", port_name)
+        return True
+
