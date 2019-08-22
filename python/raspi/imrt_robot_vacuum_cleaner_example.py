@@ -12,9 +12,13 @@ LEFT = -1
 RIGHT = 1
 FORWARDS = 1
 BACKWARDS = -1
-DRIVING_SPEED = 100
-TURNING_SPEED = 100
+DRIVING_SPEED = 200
+TURNING_SPEED = 173
 STOP_DISTANCE = 25
+
+#Minne
+gammel_venstre = 0
+tid = 0
 
 def stop_robot(duration):
 
@@ -37,14 +41,33 @@ def drive_robot(direction, duration):
 
 
 
-def turn_robot_random_angle():
+def turn_robot_90_degrees_right():
 
-    direction = random.choice([-1,1])
-    iterations = random.randint(10, 25)
+    direction = 1
+    iterations = 8
     
     for i in range(iterations):
         motor_serial.send_command(TURNING_SPEED * direction, -TURNING_SPEED * direction)
         time.sleep(0.10)
+
+def turn_robot_90_degrees_left():
+
+    direction = -1
+    iterations = 8
+    
+    for i in range(iterations):
+        motor_serial.send_command(TURNING_SPEED * direction, -TURNING_SPEED * direction)
+        time.sleep(0.10)
+
+def turn_robot_180_degrees():
+
+    direction = 1
+    iterations = 16
+    
+    for i in range(iterations):
+        motor_serial.send_command(TURNING_SPEED * direction, -TURNING_SPEED * direction)
+        time.sleep(0.10)
+
 
 
 
@@ -98,25 +121,46 @@ while not motor_serial.shutdown_now :
     # Get and print readings from distance sensors
     dist_1 = motor_serial.get_dist_1()
     dist_2 = motor_serial.get_dist_2()
-    print("Dist 1:", dist_1, "   Dist 2:", dist_2)
+    if(tid == 0):
+        gammel_venstre = dist_2
+        print("Minne",gammel_venstre)
+    tid += 1
+    if(tid >= 20):
+        tid = 0
+    dist_3 = motor_serial.get_dist_3()
+    dist_4 = motor_serial.get_dist_4()
+    #print("Bak:", dist_1, "Venstre:", dist_2, "Høyre:", dist_3,"Foran:", dist_4)
 
     # Check if there is an obstacle in the way
-    if dist_1 < STOP_DISTANCE or dist_2 < STOP_DISTANCE:
+    if dist_4 < STOP_DISTANCE:
         # There is an obstacle in front of the robot
         # First let's stop the robot for 1 second
         print("Obstacle!")
-        stop_robot(1)
+        #stop_robot(1)
 
         # Reverse for 0.5 second
-        drive_robot(BACKWARDS, 0.5)
+        # drive_robot(FORWARDS, 0.5)
 
-        # Turn random angle
-        turn_robot_random_angle()
+        # Turn 90 degrees righj
+        #turn_robot_180_degrees()
         
+    elif dist_2 > (gammel_venstre+30):
+        turn_robot_90_degrees_right()
+        gammel_venstre = 100
+        print("Sving venstre", dist_2)
 
     else:
         # If there is nothing in front of the robot it continus driving forwards
         drive_robot(FORWARDS, 0.1)
+
+    '''
+    elif dist_3 > (gammel_venstre+30):
+        turn_robot_90_degrees_left()
+        gammel_venstre = 100
+        print("Sving høyre", dist_3)
+    '''
+        
+
 
 
         

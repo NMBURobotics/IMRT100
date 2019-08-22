@@ -118,7 +118,7 @@ while not motor_serial.shutdown_now :
         drive_robot(BACKWARDS, 0.5)
 
         # Turn robot 90 degrees
-        turn_robot_90_degrees
+        turn_robot_90_degrees_right
         
 
     else:

@@ -39,8 +39,8 @@ def drive_robot(direction, duration):
 
 def turn_robot_random_angle():
 
-    direction = random.choice([-1,1])
-    iterations = random.randint(10, 25)
+    direction =  1
+    iterations = 15
     
     for i in range(iterations):
         motor_serial.send_command(TURNING_SPEED * direction, -TURNING_SPEED * direction)
@@ -49,12 +49,12 @@ def turn_robot_random_angle():
         
 def turn_robot_90_degrees_right():
         
-        direction = 1
-        iterations = 50
+    direction = 1
+    iterations = 25
         
-        for i in range(iterations):
-                motor_serial.send_command(TURNING_SPEED * direction, -TURNING_SPEED * direction)
-                time.sleep(1.0)
+    for i in range(iterations):
+        motor_serial.send_command(TURNING_SPEED * direction, -TURNING_SPEED * direction)
+        time.sleep(1.0)
 
 # We want our program to send commands at 10 Hz (10 commands per second)
 execution_frequency = 10 #Hz
@@ -115,11 +115,11 @@ while not motor_serial.shutdown_now :
         print("Obstacle!")
         stop_robot(1)
 
-        # Reverse for 0.5 second
-        #drive_robot(BACKWARDS, 0.5)
+        #Reverse for 0.5 second
+        drive_robot(BACKWARDS, 0.5)
 
         # turn robot 90 degrees
-        turn_robot_90_degrees
+        turn_robot_random_angle
         
 
     else:
