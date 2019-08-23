@@ -65,7 +65,7 @@ while not motor_serial.shutdown_now :
     dist_3 = motor_serial.get_dist_3()
     #Sensor foran
     dist_4 = motor_serial.get_dist_4()
-    print("Bak:", dist_1, "   Venstre", dist_2,  "  Høyre:", dist_3, "   Foran:", dist_4)
+    print("Bak: 1", dist_1, "   Venstre2", dist_2,  "  Høyre:3", dist_3, "   Foran:4", dist_4)
 
     
 

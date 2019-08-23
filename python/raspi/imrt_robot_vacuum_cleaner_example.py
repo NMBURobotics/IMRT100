@@ -121,7 +121,7 @@ while not motor_serial.shutdown_now :
     dist_3 = motor_serial.get_dist_3()
     dist_4 = motor_serial.get_dist_4()
 
-    #print("Bak:", dist_1, "Venstre:", dist_2, "Høyre:", dist_3,"Foran:", dist_4)
+    print("Bak:", dist_1, "Venstre:", dist_2, "Høyre:", dist_3,"Foran:", dist_4)
 
     # Check if there is an obstacle in the way
     if dist_4 < STOP_DISTANCE:
@@ -136,15 +136,37 @@ while not motor_serial.shutdown_now :
         # Turn 90 degrees righj
         #turn_robot_180_degrees()
         turn_robot_90_degrees_left()
+    if dist_3 > 50 and dist_1 > 30:
+            '''
+            direction_h = 1
+            iterations_h = int((dist_3/30))
+            print("Mye",iterations_h)
+    
+            for i in range(iterations_h):
+                motor_serial.send_command(TURNING_SPEED * direction_h, -TURNING_SPEED * direction_h)
+                time.sleep(0.10)
+            '''
+            fortsett = True
+            while(fortsett):
+                direction_h = 1
+                print("Mye")
+                motor_serial.send_command(TURNING_SPEED * direction_h, -TURNING_SPEED * 0)
+                dist_3 = motor_serial.get_dist_3()
+                dist_1 = motor_serial.get_dist_1()
+                print(dist_3)
+                if dist_3 < 45:
+                    fortsett = False
+                time.sleep(0.50)
+    elif dist_3 > (dist_1 - 10):
         
-    elif dist_3 > (dist_4 - 35):
         turn_robot_90_degrees_right()
         drive_robot(FORWARDS, 0.1)
         print("Høyre")
-    elif dist_4 > (dist_3 - 25):
+    elif dist_1 > (dist_3 - 15):
         if dist_3 < STOP_DISTANCE:
             turn_robot_90_degrees_left()
             print("Justering vegg")
+            time.sleep(0.10)
         else:
             turn_robot_90_degrees_left()
             drive_robot(FORWARDS, 0.1)
