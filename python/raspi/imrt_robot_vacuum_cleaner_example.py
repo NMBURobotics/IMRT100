@@ -16,9 +16,6 @@ DRIVING_SPEED = 200
 TURNING_SPEED = 173
 STOP_DISTANCE = 25
 
-#Minne
-gammel_venstre = 0
-tid = 0
 
 def stop_robot(duration):
 
@@ -44,7 +41,7 @@ def drive_robot(direction, duration):
 def turn_robot_90_degrees_right():
 
     direction = 1
-    iterations = 8
+    iterations = 1
     
     for i in range(iterations):
         motor_serial.send_command(TURNING_SPEED * direction, -TURNING_SPEED * direction)
@@ -53,11 +50,11 @@ def turn_robot_90_degrees_right():
 def turn_robot_90_degrees_left():
 
     direction = -1
-    iterations = 8
+    iterations = 1
     
     for i in range(iterations):
         motor_serial.send_command(TURNING_SPEED * direction, -TURNING_SPEED * direction)
-        time.sleep(0.10)
+        time.sleep(0.05)
 
 def turn_robot_180_degrees():
 
@@ -121,20 +118,15 @@ while not motor_serial.shutdown_now :
     # Get and print readings from distance sensors
     dist_1 = motor_serial.get_dist_1()
     dist_2 = motor_serial.get_dist_2()
-    if(tid == 0):
-        gammel_venstre = dist_2
-        print("Minne",gammel_venstre)
-    tid += 1
-    if(tid >= 20):
-        tid = 0
     dist_3 = motor_serial.get_dist_3()
     dist_4 = motor_serial.get_dist_4()
+
     #print("Bak:", dist_1, "Venstre:", dist_2, "Høyre:", dist_3,"Foran:", dist_4)
 
     # Check if there is an obstacle in the way
     if dist_4 < STOP_DISTANCE:
         # There is an obstacle in front of the robot
-        # First let's stop the robot for 1 second
+        # First let's stop the robot forc 1 second
         print("Obstacle!")
         #stop_robot(1)
 
@@ -143,11 +135,20 @@ while not motor_serial.shutdown_now :
 
         # Turn 90 degrees righj
         #turn_robot_180_degrees()
+        turn_robot_90_degrees_left()
         
-    elif dist_2 > (gammel_venstre+30):
+    elif dist_3 > (dist_4 - 35):
         turn_robot_90_degrees_right()
-        gammel_venstre = 100
-        print("Sving venstre", dist_2)
+        drive_robot(FORWARDS, 0.1)
+        print("Høyre")
+    elif dist_4 > (dist_3 - 25):
+        if dist_3 < STOP_DISTANCE:
+            turn_robot_90_degrees_left()
+            print("Justering vegg")
+        else:
+            turn_robot_90_degrees_left()
+            drive_robot(FORWARDS, 0.1)
+            print("Venstre")
 
     else:
         # If there is nothing in front of the robot it continus driving forwards
