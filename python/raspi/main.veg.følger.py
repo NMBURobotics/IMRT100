@@ -53,7 +53,7 @@ def turn_robot_90_degrees_right():
 def turn_robot_mange_degrees_right():
 
     direction = 1
-    iterations = 7
+    iterations = 5
     
     for i in range(iterations):
         motor_serial.send_command(TURNING_SPEED * direction, SVING_SPEED * direction)
@@ -145,7 +145,33 @@ while not motor_serial.shutdown_now :
         turn_robot_90_degrees_left()
         print("Justering foran")
         time.sleep(0.1)
-      
+
+    if dist_3 > 5 and dist_3 < 25 and dist_1 > 5 and dist_1 < 25:
+        drive_robot(FORWARDS, 0.1)
+        dist_3 = motor_serial.get_dist_3()
+        dist_1 = motor_serial.get_dist_1()
+        print("Fram")
+        if dist_3 < 20:
+            turn_robot_90_degrees_left()
+            print("Venstre limit")
+        if dist_1 < 20:
+            turn_robot_90_degrees_right()
+            print("Høyre limit")
+    if dist_3 > 30 and dist_1 > 30:
+            turn_robot_90_degrees_right()
+            drive_robot(FORWARDS, 0.5)
+            print("Høyre justering")
+    if dist_3 < 10 or dist_1 < 10:
+        if dist_3 < 10:
+            turn_robot_90_degrees_left()
+            time.sleep(0.1)
+        elif dist_1 < 10:
+            turn_robot_90_degrees_right()
+            time.sleep(0.1)
+        
+    else:
+        drive_robot(FORWARDS, 0.1)
+    '''        
     elif dist_3 > 90 and dist_1 < 40:
         drive_robot(FORWARDS, 0.5)
         turn_robot_mange_degrees_right()
@@ -179,6 +205,7 @@ while not motor_serial.shutdown_now :
         
     else:
         drive_robot(FORWARDS, 0.1)
+    '''
         
      
                 
