@@ -15,6 +15,7 @@ BACKWARDS = -1
 DRIVING_SPEED = 200
 TURNING_SPEED = 173
 STOP_DISTANCE = 25
+ADJUST_SPEED = 100
 
 
 def stop_robot(duration):
@@ -45,7 +46,17 @@ def turn_robot_90_degrees_right():
     
     for i in range(iterations):
         motor_serial.send_command(TURNING_SPEED * direction, -TURNING_SPEED * direction)
-        time.sleep(0.10)
+        time.sleep(0.1)
+
+def turn_robot_mange_degrees_right():
+
+    direction = 1
+    iterations = 8
+    
+    for i in range(iterations):
+        motor_serial.send_command(TURNING_SPEED * direction, -TURNING_SPEED * direction)
+        time.sleep(0.1)
+
 
 def turn_robot_90_degrees_left():
 
@@ -53,8 +64,8 @@ def turn_robot_90_degrees_left():
     iterations = 1
     
     for i in range(iterations):
-        motor_serial.send_command(TURNING_SPEED * direction, -TURNING_SPEED * direction)
-        time.sleep(0.05)
+        motor_serial.send_command(ADJUST_SPEED * direction, -ADJUST_SPEED * direction)
+        time.sleep(0.1)
 
 def turn_robot_180_degrees():
 
@@ -124,45 +135,27 @@ while not motor_serial.shutdown_now :
     print("Bak:", dist_1, "Venstre:", dist_2, "Høyre:", dist_3,"Foran:", dist_4)
 
     # Check if there is an obstacle in the way
-    if dist_4 < STOP_DISTANCE:
-        # There is an obstacle in front of the robot
-        # First let's stop the robot forc 1 second
-        print("Obstacle!")
-        #stop_robot(1)
-
-        # Reverse for 0.5 second
-        # drive_robot(FORWARDS, 0.5)
-
-        # Turn 90 degrees righj
-        #turn_robot_180_degrees()
-        turn_robot_90_degrees_left()
-    if dist_3 > 50 and dist_1 > 30:
-            '''
-            direction_h = 1
-            iterations_h = int((dist_3/30))
-            print("Mye",iterations_h)
-    
-            for i in range(iterations_h):
-                motor_serial.send_command(TURNING_SPEED * direction_h, -TURNING_SPEED * direction_h)
-                time.sleep(0.10)
-            '''
-            fortsett = True
-            while(fortsett):
-                direction_h = 1
-                print("Mye")
-                motor_serial.send_command(TURNING_SPEED * direction_h, -TURNING_SPEED * 0)
-                dist_3 = motor_serial.get_dist_3()
-                dist_1 = motor_serial.get_dist_1()
-                print(dist_3)
-                if dist_3 < 45:
-                    fortsett = False
-                time.sleep(0.50)
-    elif dist_3 > (dist_1 - 10):
+    if dist_4 < 15:
+        if dist_4 < 10 and dist_1 > 5:
+            drive_robot(BACKWARDS, 0.1)
+            print("Rygge")
+        else:
+            turn_robot_90_degrees_left()
+            print("Justering foran")
+            time.sleep(0.1)
+            
+    elif dist_3 > 45 and (dist_4 > 25 or dist_2 > 20):
+        drive_robot(FORWARDS, 0.5)
+        turn_robot_mange_degrees_right()
+        drive_robot(FORWARDS, 0.5)
+        print("Skarp sving")
         
+    elif dist_3 > (dist_1 + 10):
         turn_robot_90_degrees_right()
         drive_robot(FORWARDS, 0.1)
         print("Høyre")
-    elif dist_1 > (dist_3 - 15):
+
+    elif dist_1 > (dist_3):
         if dist_3 < STOP_DISTANCE:
             turn_robot_90_degrees_left()
             print("Justering vegg")
@@ -171,7 +164,7 @@ while not motor_serial.shutdown_now :
             turn_robot_90_degrees_left()
             drive_robot(FORWARDS, 0.1)
             print("Venstre")
-
+        
     else:
         # If there is nothing in front of the robot it continus driving forwards
         drive_robot(FORWARDS, 0.1)
