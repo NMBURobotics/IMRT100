@@ -148,7 +148,7 @@ while not motor_serial.shutdown_now :
       
     elif dist_3 > 90 and dist_1 < 40:
         drive_robot(FORWARDS, 0.5)
-        turn_robot_mange_degrees_right()
+        turn_robot_90_degrees_right()
         drive_robot(FORWARDS, 0.5)
         print("Skarp sving")
         
