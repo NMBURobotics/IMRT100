@@ -15,7 +15,7 @@ BACKWARDS = -1
 DRIVING_SPEED = 200
 TURNING_SPEED = 173
 STOP_DISTANCE = 25
-ADJUST_SPEED = 100
+ADJUST_SPEED = 70
 
 
 def stop_robot(duration):
@@ -51,7 +51,7 @@ def turn_robot_90_degrees_right():
 def turn_robot_mange_degrees_right():
 
     direction = 1
-    iterations = 8
+    iterations = 7
     
     for i in range(iterations):
         motor_serial.send_command(TURNING_SPEED * direction, -TURNING_SPEED * direction)
@@ -135,21 +135,31 @@ while not motor_serial.shutdown_now :
     print("Bak:", dist_1, "Venstre:", dist_2, "Høyre:", dist_3,"Foran:", dist_4)
 
     # Check if there is an obstacle in the way
-    if dist_4 < 15:
-        if dist_4 < 10 and dist_1 > 5:
-            drive_robot(BACKWARDS, 0.1)
-            print("Rygge")
-        else:
-            turn_robot_90_degrees_left()
-            print("Justering foran")
-            time.sleep(0.1)
+    if dist_3 > 100 and dist_4 > 100 and dist_2 > 100 and dist_1 > 100:
+        drive_robot(FORWARDS, 0.1)
+        print("Rett")
+
+    elif dist_4 < 25 or dist_3 < 25: 
+        turn_robot_90_degrees_left()
+        print("Justering foran")
+        time.sleep(0.1)
             
-    elif dist_3 > 45 and (dist_4 > 25 or dist_2 > 20):
-        drive_robot(FORWARDS, 0.5)
+    elif dist_3 > 90 and dist_1 < 35:
+        drive_robot(FORWARDS, 0.1)
         turn_robot_mange_degrees_right()
-        drive_robot(FORWARDS, 0.5)
+        drive_robot(FORWARDS, 0.1)
         print("Skarp sving")
-        
+        '''
+        dist_3 = motor_serial.get_dist_3()
+        if dist_3 > 60 and dist_4 > 25:
+            drive_robot(FORWARDS, 0.5)
+            turn_robot_mange_degrees_right()
+            drive_robot(FORWARDS, 0.5)
+            print("Skarp sving")
+        else:
+            drive_robot(FORWARDS, 0.1)
+        '''
+            
     elif dist_3 > (dist_1 + 10):
         turn_robot_90_degrees_right()
         drive_robot(FORWARDS, 0.1)
@@ -168,18 +178,7 @@ while not motor_serial.shutdown_now :
     else:
         # If there is nothing in front of the robot it continus driving forwards
         drive_robot(FORWARDS, 0.1)
-
-    '''
-    elif dist_3 > (gammel_venstre+30):
-        turn_robot_90_degrees_left()
-        gammel_venstre = 100
-        print("Sving høyre", dist_3)
-    '''
-        
-
-
-
-        
+     
                 
 
 
