@@ -14,8 +14,8 @@ FORWARDS = 1
 BACKWARDS = -1
 DRIVING_SPEED = 200
 STOP_DISTANCE = 35
-TURN_SPEED_RIGHT = 180
-TURN_SPEED_LEFT = 140
+TURN_SPEED_RIGHT = 100
+TURN_SPEED_LEFT = 100
 TURN_SPEED_BIG = 180
 
 
@@ -43,23 +43,22 @@ def drive_robot(direction, duration):
 def turn_robot_90_degrees_right():
 
     direction = 1
-    iterations = 1
+    iterations = 10
     
     for i in range(iterations):
         motor_serial.send_command(TURN_SPEED_RIGHT * direction, -TURN_SPEED_RIGHT * direction)
         time.sleep(0.1)
+        
+def turn_robot_90_degrees_left():
 
-def turn_robot_mange_degrees_right():
-
-    direction = 1
-    iterations = 8
+    direction = -1
+    iterations = 10
     
     for i in range(iterations):
-        motor_serial.send_command(TURN_SPEED_BIG * direction, -TURN_SPEED_BIG * direction)
+        motor_serial.send_command(TURN_SPEED_LEFT * direction, -TURN_SPEED_LEFT* direction)
         time.sleep(0.1)
-
-
-def turn_robot_90_degrees_left():
+        
+def adjust_left():
 
     direction = -1
     iterations = 1
@@ -67,6 +66,16 @@ def turn_robot_90_degrees_left():
     for i in range(iterations):
         motor_serial.send_command(TURN_SPEED_LEFT * direction, -TURN_SPEED_LEFT* direction)
         time.sleep(0.1)
+
+def adjust_right():
+
+    direction = 1
+    iterations = 1
+    
+    for i in range(iterations):
+        motor_serial.send_command(TURN_SPEED_RIGHT * direction, -TURN_SPEED_RIGHT* direction)
+        time.sleep(0.1)
+
 
 
 
@@ -118,65 +127,43 @@ while not motor_serial.shutdown_now :
 
 
     # Get and print readings from distance sensors
-    dist_1 = motor_serial.get_dist_1()
-    dist_2 = motor_serial.get_dist_2()
-    dist_3 = motor_serial.get_dist_3()
-    dist_4 = motor_serial.get_dist_4()
+    right_rear = motor_serial.get_dist_1()
+    left_front = motor_serial.get_dist_2()
+    right_front = motor_serial.get_dist_3()
+    middle_front = motor_serial.get_dist_4()
+    a = (right_front) - (right_rear)
 
-    print("Høyre bak:", dist_1, "Høyre skrå:", dist_2, "Høyre foran:", dist_3,"Midt foran:", dist_4)
-        
-    if dist_4 < 30: 
-        turn_robot_90_degrees_left()
-        print("Justering foran")
+    print("Right rear:", right_rear, "Left front:", left_front, "Right front:", right_front,"Middle front:", middle_front)
+    print("dette er a:",a)
+
+    # Check if there is an obstacle in the way
+    if middle_front < 25:
         time.sleep(0.1)
-
-    elif dist_2 < 12 or dist_3 < 5:
         turn_robot_90_degrees_left()
-        print("Justering vegg venstre")
-        time.sleep(0.10)
-          
-    elif dist_3 > 50 and dist_1 < 20:
+        print("Vegg foran")
+    
+    elif a > -8 and a < 8:
         drive_robot(FORWARDS, 0.5)
-        turn_robot_mange_degrees_right()
-        drive_robot(FORWARDS, 1.0)
-        print("Skarp sving, avstand", dist_3)
+        print("rett")
+
+    elif right_front < right_rear:
+        adjust_left()
+        print("Adjust left")
+    elif right_front > right_rear:
+        adjust_right
+        print("Adjust right")
         
-        dist_3 = motor_serial.get_dist_3()
-        if dist_3 > 60:
-            turn_robot_mange_degrees_right()
+    elif right_front > 100:
+        drive_robot(FORWARDS, 0.8)
+        turn_robot_90_degrees_right()
+        drive_robot(FORWARDS, 0.2)
+        right_front = motor_serial.get_dist_3()
+        print("right front")
+        if right_front > 100:
             drive_robot(FORWARDS, 0.8)
-            print("Skarp sving 2, avstand", dist_3)
-        else:
-            drive_robot(FORWARDS, 0.1)
-
-    elif dist_3 > 40 and dist_1 > 40:
-        turn_robot_90_degrees_right()
-        turn_robot_90_degrees_right()
-        turn_robot_90_degrees_right()
-        fortsett = True
-        gi_deg = 0
-        while(fortsett):
-            gi_deg += 1
-            drive_robot(FORWARDS, 0.1)
-            dist_4 = motor_serial.get_dist_4()
-            dist_2 = motor_serial.get_dist_2()
-            dist_3 = motor_serial.get_dist_3()
-            print("FINN VEGG", gi_deg)
-            if dist_4 < 25 or dist_3 < 25 or dist_2 < 25 or gi_deg > 15:
-                print("Gi deg")
-                fortsett = False
-                
-    elif dist_3 > (dist_1) or dist_3 > 50:
-        turn_robot_90_degrees_right()
-        drive_robot(FORWARDS, 0.1)
-        print("Liten justering høyre")
-
-    elif dist_1 > (dist_3):
-        turn_robot_90_degrees_left()
-        drive_robot(FORWARDS, 0.1)
-        print("Venstre")
-        
-        
+            turn_robot_90_degrees_right()
+            drive_robot(FORWARDS, 0.2)        
+            
     else:
         drive_robot(FORWARDS, 0.1)
 
