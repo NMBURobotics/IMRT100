@@ -15,11 +15,24 @@ import sys
 import bluedot
 import time
 
+# Create motor serial object
+motor_serial = imrt_robot_serial.IMRTRobotSerial()
+
+count = 0
 
 
+def rotated(rotation):
+    global count
+    count += rotation.value
+    print(rotation.value)
+
+    motor_serial.send_command(400 * rotation.value, -400 * rotation.value)
+    time.sleep(0.1)
+    
 
 # Robot dimentions
 ROBOT_WIDTH = 0.40 # m
+
 
 
 
@@ -32,8 +45,7 @@ ROBOT_WIDTH = 0.40 # m
 if __name__ == '__main__':
 
       
-    # Create motor serial object
-    motor_serial = imrt_robot_serial.IMRTRobotSerial()
+
 
 
     # Open serial port. Exit if serial port cannot be opened
@@ -50,6 +62,8 @@ if __name__ == '__main__':
     
     # Create bluedot object
     bd = bluedot.BlueDot()
+    bd.color = "red"
+    bd.when_rotated = rotated
 
     vx_gain = 1
     wz_gain = 2
@@ -63,7 +77,7 @@ if __name__ == '__main__':
         v1 = 0
         v2 = 0
         
-        if bd.is_pressed:
+        if bd.is_pressed and bd.position.distance < 0.8:
 
             # use pos.x, pos.y and pos.distance to determin vx and wz
             vx = vx_gain * bd.position.distance * (-1,1)[bd.position.y > 0]
@@ -71,17 +85,30 @@ if __name__ == '__main__':
             print(vx, wz)
 
             # calculate motor commands
-            v1 = (vx - ROBOT_WIDTH * wz / 2) * 200
-            v2 = (vx + ROBOT_WIDTH * wz / 2) * 200
+            v1 = (vx - ROBOT_WIDTH * wz / 2) * 700
+            v2 = (vx + ROBOT_WIDTH * wz / 2) * 700
+
+            print("sending commands")
+            motor_serial.send_command(int(v1), int(v2))
+
+        elif bd.is_pressed:
+            pass
+        else:
+            motor_serial.send_command(0, 0)
+            
+    
+
+        
 
 
             
-        # send motor commands
-        motor_serial.send_command(int(v1), int(v2))
+        #send motor commands
+        
+
 
 
         # sleep for 0.05 seconds
-        time.sleep(0.05)
+        time.sleep(0.1)
 
 
 
