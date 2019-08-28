@@ -31,6 +31,7 @@ class IMRTRobotSerial :
         self._dist_3 = 255
         self._dist_4 = 255
         
+
         # Create an event for signaling threads when its time terminate the program
         self._run_event = threading.Event()
         self._run_event.set()
