@@ -148,7 +148,7 @@ while not motor_serial.shutdown_now :
         
         dist_3 = motor_serial.get_dist_3()
         if dist_3 > 60:
-            drive_robot(FORWARDS, 0.8)
+            drive_robot(FORWARDS, 1.2)
             turn_robot_mange_degrees_right()
             drive_robot(FORWARDS, 0.8)
             print("Skarp sving 2, avstand", dist_3)
