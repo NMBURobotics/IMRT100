@@ -5,10 +5,10 @@ import threading
 
 
 class IMRTxbox:
+        
 
-    def __init__(self, device="/dev/input/js0"):
-        self._device = device
-        self._deadzone = 0.2
+    def __init__(self, device="/dev/input/js0", deadzone=0.2):
+        self._mutex = threading.Lock()
         self._shutdown_thread = False
         self._buttons = [False] * 15
         self._axes = [0.0] * 8
@@ -39,39 +39,56 @@ class IMRTxbox:
             "RT": 5
         }
 
-        self._device_listener = threading.Thread(target=self._listen_thread)
+        self._device_listener = threading.Thread(target=self._listen_thread, args=(device, deadzone))
         self._device_listener.start()
 
   
 
-    def _listen_thread(self):
+    def _listen_thread(self, device, deadzone):
+        
+        
+        evnt_size = struct.calcsize("ihBB")
+        controller_connected = False
+        
+        mutex.acquire()
+        shutdown_thread = self._shutdown_thread
+        mutex.release()
 
-        EVENT_SIZE = struct.calcsize("ihBB")
+        while not shutdown_thread:
 
-        things_are_ok = True
-        while not self._shutdown_thread:
             try:
-
-                file = open(self._device, "rb")
-                things_are_ok = True
-                print("Xbox controller connected!")
-
-                while not self._shutdown_thread:
-                    event = file.read(EVENT_SIZE)
+                if not controller_connected:
+                    file = open(device, "rb")
+                    controller_connected = True
+                    print("Xbox controller connected!")
+                
+                else:
+                    event = file.read(evnt_size)
                     (time, but_value, but_type, but_num) = struct.unpack("ihBB", event)
                     #print("time", time, "value", but_value, "type", but_type, "num", but_num)
                     if but_type == 1:
+                        self._mutex.axquire()
                         self._buttons[but_num] = not but_value
+                        self._mutex.release()
+
                     elif but_type == 2:
                         but_value /= 32767.
-                        if abs(but_value) < self._deadzone:
+                        if abs(but_value) < deadzone:
                             but_value = 0.
+                        self._mutex.axquire()
                         self._axes[but_num] = but_value 
+                        self._mutex.release()
             
             except OSError:
-                if things_are_ok:
+                if controller_connected:
                     print("Cannot find xbox controller. Is it on?")
-                    things_are_ok = False
+                    controller_connected = False
+                time.sleep(0.5)
+
+
+            mutex.acquire()
+            shutdown_thread = self._shutdown_thread
+            mutex.release()
 
                 
 
@@ -82,75 +99,175 @@ class IMRTxbox:
 
 
     def shutdown(self, blocking=True):
+        self._mutex.acquire()
         self._shutdown_thread = True
+        self._mutex.release()
         if blocking:
             self._device_listener.join()
 
 
-    def getLeftX(self):
-        return self._axes[self._axes_idx["LX"]]
+    def get_left_x(self):
+        mutex.acquire()
+        value = self._axes[self._axes_idx["LX"]]
+        mutex.release()
+        return value
 
-    def getLeftY(self):
-        return -self._axes[self._axes_idx["LY"]]
+    def get_left_y(self):
+        mutex.acquire()
+        value = -self._axes[self._axes_idx["LY"]]
+        mutex.release()
+        return value
 
-    def getLeftTrigger(self):
-        return self._axes[self._axes_idx["LT"]]
+    def get_left_trigger(self):
+        mutex.acquire()
+        value = self._axes[self._axes_idx["LT"]]
+        mutex.release()
+        return value
 
-    def getRightX(self):
-        return self._axes[self._axes_idx["RX"]]
+    def get_right_x(self):
+        mutex.acquire()
+        value = self._axes[self._axes_idx["RX"]]
+        mutex.release()
+        return value
 
-    def getRightY(self):
-        return -self._axes[self._axes_idx["RY"]]
+    def get_right_y(self):
+        mutex.acquire()
+        value = -self._axes[self._axes_idx["RY"]]
+        mutex.release()
+        return value
 
-    def getRightTrigger(self):
-        return self._axes[self._axes_idx["RT"]]
+    def get_right_trigger(self):
+        mutex.acquire()
+        value = self._axes[self._axes_idx["RT"]]
+        mutex.release()
+        return value
 
 
 
-    def getA(self):
-        return self._buttons[self._button_idx["A"]]
+    def get_a(self):
+        mutex.acquire()
+        value = self._buttons[self._button_idx["A"]]
+        mutex.release()
+        return value
 
-    def getB(self):
-        return self._buttons[self._button_idx["B"]]
+    def get_b(self):
+        mutex.acquire()
+        value = self._buttons[self._button_idx["B"]]
+        mutex.release()
+        return value
 
-    def getX(self):
-        return self._buttons[self._button_idx["X"]]
+    def get_x(self):
+        mutex.acquire()
+        value = self._buttons[self._button_idx["X"]]
+        mutex.release()
+        return value
 
-    def getY(self):
-        return self._buttons[self._button_idx["Y"]]
+    def get_y(self):
+        mutex.acquire()
+        value = self._buttons[self._button_idx["Y"]]
+        mutex.release()
+        return value
 
-    def getLeftBumper(self):
-        return self._buttons[self._button_idx["LB"]]
+    def get_left_bumper(self):
+        mutex.acquire()
+        value = self._buttons[self._button_idx["LB"]]
+        mutex.release()
+        return value
 
-    def getRightBumper(self):
-        return self._buttons[self._button_idx["RB"]]
+    def get_right_bumper(self):
+        mutex.acquire()
+        value = self._buttons[self._button_idx["RB"]]
+        mutex.release()
+        return value
 
-    def getBack(self):
-        return self._buttons[self._button_idx["Back"]]
+    def get_back(self):
+        mutex.acquire()
+        value = self._buttons[self._button_idx["Back"]]
+        mutex.release()
+        return value
 
-    def getStart(self):
-        return self._buttons[self._button_idx["Start"]]
+    def get_start(self):
+        mutex.acquire()
+        value = self._buttons[self._button_idx["Start"]]
+        mutex.release()
+        return value
 
-    def getXbox(self):
-        return self._buttons[self._button_idx["Xbox"]]
+    def get_xbox(self):
+        mutex.acquire()
+        value = self._buttons[self._button_idx["Xbox"]]
+        mutex.release()
+        return value
 
-    def getLeftStick(self):
-        return self._buttons[self._button_idx["Lstick"]]
+    def get_left_stick(self):
+        mutex.acquire()
+        value = self._buttons[self._button_idx["Lstick"]]
+        mutex.release()
+        return value
 
-    def getRightStick(self):
-        return self._buttons[self._button_idx["Rstick"]]
+    def get_right_stick(self):
+        mutex.acquire()
+        value = self._buttons[self._button_idx["Rstick"]]
+        mutex.release()
+        return value
 
-    def getLeft(self):
-        return self._buttons[self._button_idx["Left"]]
+    def get_dpad_left(self):
+        mutex.acquire()
+        value = self._buttons[self._button_idx["Left"]]
+        mutex.release()
+        return value
 
-    def getRight(self):
-        return self._buttons[self._button_idx["Right"]]
+    def get_dpad_right(self):
+        mutex.acquire()
+        value = self._buttons[self._button_idx["Right"]]
+        mutex.release()
+        return value
 
-    def getUp(self):
-        return self._buttons[self._button_idx["Up"]]
+    def get_dpad_up(self):
+        mutex.acquire()
+        value = self._buttons[self._button_idx["Up"]]
+        mutex.release()
+        return value
 
-    def getDown(self):
-        return self._buttons[self._button_idx["Down"]]
+    def get_dpad_down(self):
+        mutex.acquire()
+        value = self._buttons[self._button_idx["Down"]]
+        mutex.release()
+        return value
 
+
+
+# Example of usage
+def main():
+    controller = IMRTxbox()
+
+    try:
+        while(True):
+            but_a = controller.get_a()
+            but_b = controller.get_b()
+            but_x = controller.get_x()
+            but_y = controller.get_y()
+
+            ax_lx = controller.get_left_x()
+            ax_ly = controller.get_left_y()
+            ax_rx = controller.get_right_x()
+            ax_ry = controller.get_right_y()
+
+            print("a: {}, b: {}, x: {}, y: {}, lx: {:+.2f}, ly: {:+.2f}, rx: {:+.2f}, ry: {:+.2f}".format(but_a, but_b, but_x, but_y, ax_lx, ax_ly, ax_rx, ax_ry), end='\r')
+
+            time.sleep(0.1)
+
+    except: KeyboardInterrupt:
+        print("\nTerminated by user")
+
+    finally:
+        controller.shutdown()
+        print("Exiting program")
+
+
+
+
+
+if __name__ == '__main__':
+    main()
 
 
