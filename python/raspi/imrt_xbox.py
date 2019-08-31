@@ -51,9 +51,9 @@ class IMRTxbox:
         evnt_size = struct.calcsize("ihBB")
         controller_connected = False
         
-        mutex.acquire()
+        self._mutex.acquire()
         shutdown_thread = self._shutdown_thread
-        mutex.release()
+        self._mutex.release()
 
         while not shutdown_thread:
 
@@ -67,7 +67,7 @@ class IMRTxbox:
                     event = file.read(evnt_size)
                     (but_time, but_value, but_type, but_num) = struct.unpack("ihBB", event)
                     if but_type == 1:
-                        self._mutex.axquire()
+                        self._mutex.acquire()
                         self._buttons[but_num] = not but_value
                         self._mutex.release()
 
@@ -75,7 +75,7 @@ class IMRTxbox:
                         but_value /= 32767.
                         if abs(but_value) < deadzone:
                             but_value = 0.
-                        self._mutex.axquire()
+                        self._mutex.acquire()
                         self._axes[but_num] = but_value 
                         self._mutex.release()
             
@@ -86,9 +86,9 @@ class IMRTxbox:
                 time.sleep(0.5)
 
 
-            mutex.acquire()
+            self._mutex.acquire()
             shutdown_thread = self._shutdown_thread
-            mutex.release()
+            self._mutex.release()
 
                 
 
@@ -107,131 +107,131 @@ class IMRTxbox:
 
 
     def get_left_x(self):
-        mutex.acquire()
+        self._mutex.acquire()
         value = self._axes[self._axes_idx["LX"]]
-        mutex.release()
+        self._mutex.release()
         return value
 
     def get_left_y(self):
-        mutex.acquire()
+        self._mutex.acquire()
         value = -self._axes[self._axes_idx["LY"]]
-        mutex.release()
+        self._mutex.release()
         return value
 
     def get_left_trigger(self):
-        mutex.acquire()
+        self._mutex.acquire()
         value = self._axes[self._axes_idx["LT"]]
-        mutex.release()
+        self._mutex.release()
         return value
 
     def get_right_x(self):
-        mutex.acquire()
+        self._mutex.acquire()
         value = self._axes[self._axes_idx["RX"]]
-        mutex.release()
+        self._mutex.release()
         return value
 
     def get_right_y(self):
-        mutex.acquire()
+        self._mutex.acquire()
         value = -self._axes[self._axes_idx["RY"]]
-        mutex.release()
+        self._mutex.release()
         return value
 
     def get_right_trigger(self):
-        mutex.acquire()
+        self._mutex.acquire()
         value = self._axes[self._axes_idx["RT"]]
-        mutex.release()
+        self._mutex.release()
         return value
 
 
 
     def get_a(self):
-        mutex.acquire()
+        self._mutex.acquire()
         value = self._buttons[self._button_idx["A"]]
-        mutex.release()
+        self._mutex.release()
         return value
 
     def get_b(self):
-        mutex.acquire()
+        self._mutex.acquire()
         value = self._buttons[self._button_idx["B"]]
-        mutex.release()
+        self._mutex.release()
         return value
 
     def get_x(self):
-        mutex.acquire()
+        self._mutex.acquire()
         value = self._buttons[self._button_idx["X"]]
-        mutex.release()
+        self._mutex.release()
         return value
 
     def get_y(self):
-        mutex.acquire()
+        self._mutex.acquire()
         value = self._buttons[self._button_idx["Y"]]
-        mutex.release()
+        self._mutex.release()
         return value
 
     def get_left_bumper(self):
-        mutex.acquire()
+        self._mutex.acquire()
         value = self._buttons[self._button_idx["LB"]]
-        mutex.release()
+        self._mutex.release()
         return value
 
     def get_right_bumper(self):
-        mutex.acquire()
+        self._mutex.acquire()
         value = self._buttons[self._button_idx["RB"]]
-        mutex.release()
+        self._mutex.release()
         return value
 
     def get_back(self):
-        mutex.acquire()
+        self._mutex.acquire()
         value = self._buttons[self._button_idx["Back"]]
-        mutex.release()
+        self._mutex.release()
         return value
 
     def get_start(self):
-        mutex.acquire()
+        self._mutex.acquire()
         value = self._buttons[self._button_idx["Start"]]
-        mutex.release()
+        self._mutex.release()
         return value
 
     def get_xbox(self):
-        mutex.acquire()
+        self._mutex.acquire()
         value = self._buttons[self._button_idx["Xbox"]]
-        mutex.release()
+        self._mutex.release()
         return value
 
     def get_left_stick(self):
-        mutex.acquire()
+        self._mutex.acquire()
         value = self._buttons[self._button_idx["Lstick"]]
-        mutex.release()
+        self._mutex.release()
         return value
 
     def get_right_stick(self):
-        mutex.acquire()
+        self._mutex.acquire()
         value = self._buttons[self._button_idx["Rstick"]]
-        mutex.release()
+        self._mutex.release()
         return value
 
     def get_dpad_left(self):
-        mutex.acquire()
+        self._mutex.acquire()
         value = self._buttons[self._button_idx["Left"]]
-        mutex.release()
+        self._mutex.release()
         return value
 
     def get_dpad_right(self):
-        mutex.acquire()
+        self._mutex.acquire()
         value = self._buttons[self._button_idx["Right"]]
-        mutex.release()
+        self._mutex.release()
         return value
 
     def get_dpad_up(self):
-        mutex.acquire()
+        self._mutex.acquire()
         value = self._buttons[self._button_idx["Up"]]
-        mutex.release()
+        self._mutex.release()
         return value
 
     def get_dpad_down(self):
-        mutex.acquire()
+        self._mutex.acquire()
         value = self._buttons[self._button_idx["Down"]]
-        mutex.release()
+        self._mutex.release()
         return value
 
 
