@@ -65,8 +65,7 @@ class IMRTxbox:
                 
                 else:
                     event = file.read(evnt_size)
-                    (time, but_value, but_type, but_num) = struct.unpack("ihBB", event)
-                    #print("time", time, "value", but_value, "type", but_type, "num", but_num)
+                    (but_time, but_value, but_type, but_num) = struct.unpack("ihBB", event)
                     if but_type == 1:
                         self._mutex.axquire()
                         self._buttons[but_num] = not but_value
