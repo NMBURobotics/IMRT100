@@ -10,7 +10,7 @@ def drawEye(pos, ball_size, pup_size, view_dir):
     pygame.draw.circle(surface, BLACK, pup_pos, 20, 0)
 
 win_x = 800
-win_y = 600
+win_y = 480
 win_size = [win_x,win_y]
 
 WHITE = (255, 255, 255)
@@ -40,13 +40,9 @@ DISPLAYSURF = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 window = True
 while window:
 
-    #pygame.draw.ellipse(surface, BLACK, (100, 200, 140, 200), 2)
-    #pygame.draw.circle(surface, BLACK, (300, 200), 20, 0)
-
-
     surface.fill(GREEN)
-    drawEye(( (win_x + eye_spacing) / 2, win_y * 4 / 9), (160, 200), 20, (l_eye_pos_x, l_eye_pos_y))
-    drawEye(( (win_x - eye_spacing) / 2, win_y * 4 / 9), (160, 200), 20, (r_eye_pos_x, r_eye_pos_y))
+    drawEye(( (win_x + eye_spacing) / 2, win_y * 7 / 18), (160, 200), 20, (l_eye_pos_x, l_eye_pos_y))
+    drawEye(( (win_x - eye_spacing) / 2, win_y * 7 / 18), (160, 200), 20, (r_eye_pos_x, r_eye_pos_y))
 
     if (random.randint(0, 200) == 100):
         l_eye_pos_x = -0.5 + random.random()
@@ -56,8 +52,8 @@ while window:
         r_eye_pos_x = -0.5 + random.random()
         r_eye_pos_y = -0.5 + random.random()
 
-    mouth_x = (win_x - mouth.get_rect().width) / 2 + random.randint(-10, 10)
-    mouth_y = win_y * 2 / 3 + random.randint(-10, 10)
+    mouth_x = (win_x - mouth.get_rect().width) / 2 + random.randint(-4, 4)
+    mouth_y = win_y * 11 / 18 + random.randint(-4, 4)
     surface.blit(mouth, (mouth_x, mouth_y))
 
     pygame.display.update()
