@@ -45,12 +45,12 @@ while window:
     drawEye(( (win_x - eye_spacing) / 2, win_y * 7 / 18), (160, 200), 20, (r_eye_pos_x, r_eye_pos_y))
 
     if (random.randint(0, 200) == 100):
-        l_eye_pos_x = -0.5 + random.random()
-        l_eye_pos_y = -0.5 + random.random()
+        l_eye_pos_x = (-0.5 + random.random()) * 1.6
+        l_eye_pos_y = (-0.5 + random.random()) * 1.6
 
     if (random.randint(0, 200) == 100):
-        r_eye_pos_x = -0.5 + random.random()
-        r_eye_pos_y = -0.5 + random.random()
+        r_eye_pos_x = (-0.5 + random.random()) * 1.6
+        r_eye_pos_y = (-0.5 + random.random()) * 1.6
 
     mouth_x = (win_x - mouth.get_rect().width) / 2 + random.randint(-4, 4)
     mouth_y = win_y * 11 / 18 + random.randint(-4, 4)
