@@ -32,12 +32,14 @@ win.set_caption('Robot eyes')
 surface = win.set_mode(win_size)
 
 mouth = pygame.image.load('mouth_382_crop.png')
+welcome = pygame.image.load('welcome.png')
 
 clock = pygame.time.Clock()
 
 DISPLAYSURF = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 
 window = True
+w_c = 0
 while window:
 
     surface.fill(GREEN)
@@ -55,6 +57,14 @@ while window:
     mouth_x = (win_x - mouth.get_rect().width) / 2 + random.randint(-4, 4)
     mouth_y = win_y * 11 / 18 + random.randint(-4, 4)
     surface.blit(mouth, (mouth_x, mouth_y))
+    
+    if w_c < 48:
+        surface.blit(welcome, (0, 480-w_c*10))
+    elif w_c < 200:
+        surface.blit(welcome, (0, 0))
+    elif w_c < 248:
+        surface.blit(welcome, (0, (w_c-200)*10))
+
 
     pygame.display.update()
 
@@ -66,6 +76,8 @@ while window:
             if event.key == pygame.K_ESCAPE:
                 window = False
 
+        
+    w_c = (w_c + 1) % 1000
     clock.tick(40)
 
     
