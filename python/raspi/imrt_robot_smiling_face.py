@@ -58,14 +58,6 @@ while window:
     mouth_y = win_y * 11 / 18 + random.randint(-4, 4)
     surface.blit(mouth, (mouth_x, mouth_y))
     
-    if w_c < 48:
-        surface.blit(welcome, (0, 480-w_c*10))
-    elif w_c < 200:
-        surface.blit(welcome, (0, 0))
-    elif w_c < 248:
-        surface.blit(welcome, (0, (w_c-200)*10))
-
-
     pygame.display.update()
 
     events = pygame.event.get()
