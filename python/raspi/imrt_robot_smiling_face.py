@@ -32,7 +32,6 @@ win.set_caption('Robot eyes')
 surface = win.set_mode(win_size)
 
 mouth = pygame.image.load('mouth_382_crop.png')
-welcome = pygame.image.load('welcome.png')
 
 clock = pygame.time.Clock()
 
