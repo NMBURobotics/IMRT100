@@ -13,15 +13,15 @@ def draw_eye(eye_pos, ball_size, pup_size, view_angle, view_offset):
     ball_corner = (eye_pos[0] - ball_size[0] / 2, eye_pos[1] - ball_size[1] / 2)
     
     # draw ellipses
-    pygame.draw.ellipse(surface, WHITE, ball_corner + ball_size, 0)
-    pygame.draw.ellipse(surface, BLACK, ball_corner + ball_size, 2)
+    pygame.draw.ellipse(surface, WHITE, (ball_corner, ball_size), 0)
+    pygame.draw.ellipse(surface, BLACK, (ball_corner, ball_size), 2)
 
     # calculate ellipse radius at given view angle
     ellipse_radius = ball_size[0]/2 * ball_size[1]/2 * sqrt(1 / ((ball_size[1]/2)**2 * cos(view_angle)**2 + (ball_size[0]/2)**2 * sin(view_angle)**2))
 
     # calculate pupile x and y
-    pup_x = eye_pos[0] + int( (view_offset * (ellipse_radius - pup_size)) * cos(view_angle) )
-    pup_y = eye_pos[1] + int( (view_offset * (ellipse_radius - pup_size)) * sin(view_angle) )
+    pup_x = int( eye_pos[0] + (view_offset * (ellipse_radius - pup_size)) * cos(view_angle) )
+    pup_y = int( eye_pos[1] + (view_offset * (ellipse_radius - pup_size)) * sin(view_angle) )
 
     # draw pupile
     pygame.draw.circle(surface, BLACK, (pup_x, pup_y), 20, 0)
@@ -69,8 +69,8 @@ while window:
     surface.fill(GREEN)
     
     # make mouth shake by moving it slightly at random
-    mouth_x = (win_x - mouth.get_rect().width) / 2 + random.randint(-4, 4)
-    mouth_y = win_y * 11 / 18 + random.randint(-4, 4)
+    mouth_x = int((win_x - mouth.get_rect().width) / 2 + random.randint(-4, 4))
+    mouth_y = int(win_y * 11 / 18 + random.randint(-4, 4))
     
     # draw mouth
     surface.blit(mouth, (mouth_x, mouth_y))
