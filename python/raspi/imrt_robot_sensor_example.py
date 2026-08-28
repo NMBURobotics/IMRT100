@@ -59,7 +59,36 @@ while not motor_serial.shutdown_now :
     # Get and print readings from distance sensors
     dist_1 = motor_serial.get_dist_1()
     dist_2 = motor_serial.get_dist_2()
-    print("Dist 1:", dist_1, "   Dist 2:", dist_2)
+    dist_3 = motor_serial.get_dist_3()
+    dist_4 = motor_serial.get_dist_4()
+    #print("Dist 1:", dist_1, "   Dist 2:", dist_2, "   Dist 3:", dist_3, "   Dist 4:", dist_4) # Old way to print, not very pretty.
+    
+    # We want to print the distance readings in a nice way, so that the numbers are aligned
+    if (dist_1 < 10):
+        dist_1_text = "Dist 1:  "
+    elif (dist_1 < 100):
+        dist_1_text = "Dist 1: "
+    else:
+        dist_1_text = "Dist 1:"
+    if (dist_2 < 10):
+        dist_2_text = "Dist 2:  "
+    elif (dist_2 < 100):
+        dist_2_text = "Dist 2: "
+    else:
+        dist_2_text = "Dist 2:"
+    if (dist_3 < 10):
+        dist_3_text = "Dist 3:  "
+    elif (dist_3 < 100):
+        dist_3_text = "Dist 3: "
+    else:
+        dist_3_text = "Dist 3:"
+    if (dist_4 < 10):               
+        dist_4_text = "Dist 4:  "
+    elif (dist_4 < 100):
+        dist_4_text = "Dist 4: "
+    else:
+        dist_4_text = "Dist 4:"   
+    print(dist_1_text, dist_1, "   ", dist_2_text, dist_2, "   ", dist_3_text, dist_3, "   ", dist_4_text, dist_4)
 
     
 

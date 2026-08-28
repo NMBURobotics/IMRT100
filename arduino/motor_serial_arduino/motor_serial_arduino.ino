@@ -172,7 +172,7 @@ void loop()
   // Send commands to motor controller
   md.setM1Speed(m1_cmd_);
   md.setM2Speed(m2_cmd_);
-  stopIfFault();
+  //stopIfFault();
 
 
   // Get and transmit feedback
